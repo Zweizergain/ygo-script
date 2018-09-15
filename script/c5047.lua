@@ -1,0 +1,73 @@
+--娘化 海格力斯
+function c5047.initial_effect(c)
+	--synchro summon
+	aux.AddSynchroProcedure(c,c5047.tfilter,aux.NonTuner(Card.IsSetCard,0x900),1)
+	c:EnableReviveLimit()   
+	--indestructable by effect  
+	local e1=Effect.CreateEffect(c) 
+	e1:SetType(EFFECT_TYPE_SINGLE)  
+	e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)	
+	e1:SetRange(LOCATION_MZONE) 
+	e1:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)	
+	e1:SetValue(1)  
+	c:RegisterEffect(e1)
+	--disable spsummon
+	local e2=Effect.CreateEffect(c)
+	e2:SetType(EFFECT_TYPE_FIELD)
+	e2:SetRange(LOCATION_MZONE)
+	e2:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
+	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+	e2:SetTargetRange(1,0)
+	c:RegisterEffect(e2)
+	--pierce
+	local e3=Effect.CreateEffect(c)
+	e3:SetType(EFFECT_TYPE_SINGLE)
+	e3:SetCode(EFFECT_PIERCE)
+	c:RegisterEffect(e3)
+	--cannot destroy by battle(limit 1) 
+	local e4=Effect.CreateEffect(c) 
+	e4:SetType(EFFECT_TYPE_SINGLE)  
+	e4:SetCode(EFFECT_INDESTRUCTABLE_COUNT) 
+	e4:SetProperty(EFFECT_FLAG_SINGLE_RANGE)	
+	e4:SetCountLimit(11) 
+	e4:SetRange(LOCATION_MZONE) 
+	e4:SetValue(c5047.ebcon)	
+	c:RegisterEffect(e4)
+	--attack -1k
+	local e5=Effect.CreateEffect(c)
+	e5:SetDescription(aux.Stringid(5047,0))
+	e5:SetCategory(CATEGORY_ATKCHANGE)
+	e5:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
+	e5:SetCode(EVENT_TO_GRAVE)
+	e5:SetCountLimit(1)
+	e5:SetOperation(c5047.atkop)
+	c:RegisterEffect(e5)
+	local e6=e5:Clone()
+	e6:SetCode(EVENT_REMOVE)
+	e6:SetCountLimit(1)
+	c:RegisterEffect(e6)
+	local e7=e5:Clone()
+	e7:SetCode(EVENT_TO_DECK)
+	e7:SetCountLimit(1)
+	c:RegisterEffect(e7)
+end
+function c5047.tfilter(c)   
+	return c:IsSetCard(0x900)
+end
+function c5047.ebcon(e,re,r,rp) 
+	return bit.band(r,REASON_BATTLE)~=0
+end
+function c5047.atkop(e,tp,eg,ep,ev,re,r,rp)
+	local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,LOCATION_MZONE,LOCATION_MZONE,nil)
+	local tc=g:GetFirst()
+	while tc do
+		local e1=Effect.CreateEffect(e:GetHandler())
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetCode(EFFECT_UPDATE_ATTACK)
+		e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+		e1:SetValue(-2000)
+		e1:SetReset(RESET_EVENT+0x1fe0000)
+		tc:RegisterEffect(e1)
+		tc=g:GetNext()
+	end
+end
